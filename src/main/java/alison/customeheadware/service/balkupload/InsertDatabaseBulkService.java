@@ -1,8 +1,6 @@
 package alison.customeheadware.service.balkupload;
 
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -106,15 +104,17 @@ public class InsertDatabaseBulkService {
     }
 
     private Long findOrCreateColor(String name, Long id) {
+        
         Optional<HatColor> existingHatColor = hatColorRepository.findTop1ByHatAndNameIgnoreCase(id,name);
         
         Long hatColorId;
         
         if (existingHatColor.isPresent()) {
-            // Hat exists, get ID
+            System.out.println(existingHatColor.isPresent()+"present");
             hatColorId = existingHatColor.get().getId();
            
         } else {
+             System.out.println("false"+"present");
             // Hat doesn't exist, create new
             HatColor newHatColoHat = new HatColor();
             newHatColoHat.setHat(id);
@@ -130,8 +130,8 @@ public class InsertDatabaseBulkService {
     }
 
     private Long findOrCreateStyle(String name, Long id) {
-        System.out.println(name+"namesssssss");
-        Optional<HatSizeVariant> existingHatColorSize = hatSizeVariantRepository.findTop1ByVariantNameIgnoreCase(name);
+        System.out.println(name+id+"namesssssss");
+        Optional<HatSizeVariant> existingHatColorSize = hatSizeVariantRepository.findTop1ByHatColorAndVariantNameIgnoreCase(id,name);
         
         Long hatColorSizeId;
         
