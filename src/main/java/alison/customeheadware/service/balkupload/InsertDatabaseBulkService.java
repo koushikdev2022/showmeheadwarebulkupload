@@ -166,8 +166,10 @@ public class InsertDatabaseBulkService {
             
             if (existingItem.isPresent()) {
                 InventoryItem item = existingItem.get();
-                item.setQtyAvailable(capSize.getAvailableQuantity());  
-                item.setQtyOnHand(capSize.getAvailableQuantity());
+                System.out.println(item+"itemitemitem");
+                 System.out.println((item.getQtyAvailable() + capSize.getAvailableQuantity())+"itemitemitem");
+                item.setQtyAvailable(item.getQtyAvailable() + capSize.getAvailableQuantity());  
+                item.setQtyOnHand(item.getQtyOnHand() + capSize.getAvailableQuantity());
                 InventoryItem updatedItem = inventoryItemRepository.save(item);
                
                 return updatedItem.getId();
