@@ -139,9 +139,31 @@ public class CreateParseDataService {
         groupedDTO.setHatName(hatName);
         
         // Get the first description (assuming same hatName has same description)
-        String description = items.isEmpty() ? "" : items.get(0).getHatDescription();
-        groupedDTO.setHatDescription(description);
-        
+        if (!items.isEmpty()) {
+            CapInventoryDTO firstItem = items.get(0);
+            
+            // Set description
+            groupedDTO.setHatDescription(firstItem.getHatDescription());
+            
+            // Set embroidery pricing tiers
+            groupedDTO.setEmbroidery24(firstItem.getEmbroidery24());
+            groupedDTO.setEmbroidery48(firstItem.getEmbroidery48());
+            groupedDTO.setEmbroidery96(firstItem.getEmbroidery96());
+            groupedDTO.setEmbroidery144(firstItem.getEmbroidery144());
+            groupedDTO.setEmbroidery576(firstItem.getEmbroidery576());
+            groupedDTO.setEmbroidery2500Plus(firstItem.getEmbroidery2500Plus());
+            
+            // Set leather patch pricing tiers
+            groupedDTO.setLeatherPatch24(firstItem.getLeatherPatch24());
+            groupedDTO.setLeatherPatch48(firstItem.getLeatherPatch48());
+            groupedDTO.setLeatherPatch96(firstItem.getLeatherPatch96());
+            groupedDTO.setLeatherPatch144(firstItem.getLeatherPatch144());
+            groupedDTO.setLeatherPatch576(firstItem.getLeatherPatch576());
+            groupedDTO.setLeatherPatch2500Plus(firstItem.getLeatherPatch2500Plus());
+        } else {
+            groupedDTO.setHatDescription("");
+        }
+
         // Group by hatColor
         Map<String, List<CapInventoryDTO>> groupedByColor = items.stream()
             .collect(Collectors.groupingBy(
