@@ -64,7 +64,7 @@ public class InventoryController {
             
             // Group and transform with parallel processing
             CapInventoryResponseDTO insertData = createParseDataService.upload(inventoryList);
-            // CapInventoryResponseDTO data = insertDatabaseBulkService.uploadIntoDatabase(insertData);
+            CapInventoryResponseDTO data = insertDatabaseBulkService.uploadIntoDatabase(insertData);
             long totalTime = System.currentTimeMillis() - startTime;
             log.info("Total upload processing completed in {}ms", totalTime);
             

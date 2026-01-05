@@ -8,17 +8,20 @@ import org.springframework.stereotype.Service;
 import alison.customeheadware.dto.CapColorItemDTO;
 import alison.customeheadware.dto.CapInventoryResponseDTO;
 import alison.customeheadware.dto.CapSizeDTO;
+import alison.customeheadware.dto.DecorationPriceTierDTO;
 import alison.customeheadware.dto.GroupedCapInventoryDTO;
 import alison.customeheadware.entity.Hat;
 import alison.customeheadware.entity.HatColor;
 import alison.customeheadware.entity.HatSizeVariant;
 import alison.customeheadware.entity.InventoryItem;
+import alison.customeheadware.entity.StyleDecorationPriceTier;
 import alison.customeheadware.enums.InventorySource;
 import alison.customeheadware.enums.InventoryStatus;
 import alison.customeheadware.repository.HatColorRepository;
 import alison.customeheadware.repository.HatRepository;
 import alison.customeheadware.repository.HatSizeVariantRepository;
 import alison.customeheadware.repository.InventoryItemRepository;
+import alison.customeheadware.repository.StyleDecorationPriceTierRepository;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -31,7 +34,8 @@ public class InsertDatabaseBulkService {
     private HatSizeVariantRepository hatSizeVariantRepository;
     @Autowired
     private InventoryItemRepository inventoryItemRepository;
-
+    @Autowired
+    private StyleDecorationPriceTierRepository styleDecorationPriceTierRepository;
     @Transactional
     public CapInventoryResponseDTO uploadIntoDatabase(CapInventoryResponseDTO capInventoryResponseDTO) {
         
@@ -47,8 +51,17 @@ public class InsertDatabaseBulkService {
             
             Long hatId = findOrCreateHat(hatData.getHatName(), hatData.getHatDescription());
             
-            if (hatData.getItems() == null) {
-                continue;  
+            // if (hatData.getItems() == null) {
+            //     continue;  
+            // }
+            for(DecorationPriceTierDTO dec: hatData.getDecoration()){
+                System.out.println(dec+"leatherPatchdetails");
+                if("leatherPatch".equals(dec.getName()) ){
+                    Long decorId= findOrCreateDecorationPrice(hatId,2L,dec);
+                }else{
+                    Long decorId= findOrCreateDecorationPrice(hatId,1L,dec);
+                }
+                
             }
             
             for (CapColorItemDTO colorItemDTO : hatData.getItems()) {
@@ -127,6 +140,43 @@ public class InsertDatabaseBulkService {
         }
         
         return hatColorId;
+    }
+   private Long findOrCreateDecorationPrice(Long hatId, Long decorationTypeId, DecorationPriceTierDTO dec) {
+    
+        // Find existing record by hatId, decorationTypeId, and minQty
+        Optional<StyleDecorationPriceTier> existingDecoration = styleDecorationPriceTierRepository
+            .findTop1ByHatIdAndDecorationTypeIdAndMinQty(hatId, decorationTypeId,dec.getMinQty());
+        
+        StyleDecorationPriceTier styleDecorationPriceTier;
+        
+        if (existingDecoration.isPresent()) {
+            // UPDATE existing record
+         
+            
+            styleDecorationPriceTier = existingDecoration.get();
+       
+            styleDecorationPriceTier.setUnitPrice(dec.getPrice());
+            styleDecorationPriceTier.setMinQty(dec.getMinQty());
+            styleDecorationPriceTier.setIsActive(1);
+            
+        } else {
+            // CREATE new record
+     
+            
+            styleDecorationPriceTier = new StyleDecorationPriceTier();
+            styleDecorationPriceTier.setHatId(hatId);
+            styleDecorationPriceTier.setDecorationTypeId(decorationTypeId);
+            styleDecorationPriceTier.setMinQty(dec.getMinQty());
+            styleDecorationPriceTier.setMaxQty(dec.getMaxQty());
+            styleDecorationPriceTier.setUnitPrice(dec.getPrice());
+            styleDecorationPriceTier.setDisplayLabel(dec.getMinQty() + (dec.getMaxQty() != null ? "-" + dec.getMaxQty() : "+"));
+            styleDecorationPriceTier.setIsActive(1);
+        }
+        
+        // Save (works for both create and update)
+        StyleDecorationPriceTier savedData = styleDecorationPriceTierRepository.save(styleDecorationPriceTier);
+        
+        return savedData.getId();
     }
 
     private Long findOrCreateStyle(String name, Long id) {
