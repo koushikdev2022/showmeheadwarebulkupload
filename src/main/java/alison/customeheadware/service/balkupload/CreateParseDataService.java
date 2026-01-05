@@ -70,8 +70,10 @@ import alison.customeheadware.dto.CapInventoryDTO;
 import alison.customeheadware.dto.CapInventoryResponseDTO;
 import alison.customeheadware.dto.CapColorItemDTO;
 import alison.customeheadware.dto.CapSizeDTO;
+import alison.customeheadware.dto.DecorationPriceTierDTO;
 import alison.customeheadware.dto.GroupedCapInventoryDTO;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -141,25 +143,52 @@ public class CreateParseDataService {
         // Get the first description (assuming same hatName has same description)
         if (!items.isEmpty()) {
             CapInventoryDTO firstItem = items.get(0);
-            
+            List<DecorationPriceTierDTO> decorationList = new ArrayList<>();
             // Set description
             groupedDTO.setHatDescription(firstItem.getHatDescription());
-            
-            // Set embroidery pricing tiers
-            groupedDTO.setEmbroidery24(firstItem.getEmbroidery24());
-            groupedDTO.setEmbroidery48(firstItem.getEmbroidery48());
-            groupedDTO.setEmbroidery96(firstItem.getEmbroidery96());
-            groupedDTO.setEmbroidery144(firstItem.getEmbroidery144());
-            groupedDTO.setEmbroidery576(firstItem.getEmbroidery576());
-            groupedDTO.setEmbroidery2500Plus(firstItem.getEmbroidery2500Plus());
-            
-            // Set leather patch pricing tiers
-            groupedDTO.setLeatherPatch24(firstItem.getLeatherPatch24());
-            groupedDTO.setLeatherPatch48(firstItem.getLeatherPatch48());
-            groupedDTO.setLeatherPatch96(firstItem.getLeatherPatch96());
-            groupedDTO.setLeatherPatch144(firstItem.getLeatherPatch144());
-            groupedDTO.setLeatherPatch576(firstItem.getLeatherPatch576());
-            groupedDTO.setLeatherPatch2500Plus(firstItem.getLeatherPatch2500Plus());
+
+            Map<String, BigDecimal> priceFields = new LinkedHashMap<>();
+
+            priceFields.put("embroidery_24", firstItem.getEmbroidery24());
+            priceFields.put("embroidery_48", firstItem.getEmbroidery48());
+            priceFields.put("embroidery_96", firstItem.getEmbroidery96());
+            priceFields.put("embroidery_144", firstItem.getEmbroidery144());
+            priceFields.put("embroidery_576", firstItem.getEmbroidery576());
+            priceFields.put("embroidery_2500_plus", firstItem.getEmbroidery2500Plus());
+        
+            priceFields.put("leatherPatch_24", firstItem.getLeatherPatch24());
+            priceFields.put("leatherPatch_48", firstItem.getLeatherPatch48());
+            priceFields.put("leatherPatch_96", firstItem.getLeatherPatch96());
+            priceFields.put("leatherPatch_144", firstItem.getLeatherPatch144());
+            priceFields.put("leatherPatch_576", firstItem.getLeatherPatch576());
+            priceFields.put("leatherPatch_2500_plus", firstItem.getLeatherPatch2500Plus());
+         
+            priceFields.forEach((fieldName, price) -> {
+                if (price != null) {
+                    // Parse fieldName to extract type and quantity
+                    String[] parts = fieldName.split("_");
+                    String decorationType = parts[0]; // embroidery or leatherPatch
+                    
+                    // Extract quantity (handling "_plus" suffix)
+                    int minQty;
+                    if (parts.length == 3 && parts[2].equals("plus")) {
+                        minQty = Integer.parseInt(parts[1]); // e.g., 2500 from "embroidery_2500_plus"
+                    } else {
+                        minQty = Integer.parseInt(parts[1]); // e.g., 24 from "embroidery_24"
+                    }
+                    
+                    DecorationPriceTierDTO tier = new DecorationPriceTierDTO();
+                    tier.setName(decorationType);
+                    tier.setMinQty(minQty);
+                    tier.setPrice(price);
+                    
+                    log.debug("Field: {}, Type: {}, MinQty: {}, Price: {}", 
+                        fieldName, decorationType, minQty, price);
+                    
+                    decorationList.add(tier);
+                }
+            });
+            groupedDTO.setDecoration(decorationList);
         } else {
             groupedDTO.setHatDescription("");
         }
@@ -200,4 +229,6 @@ public class CreateParseDataService {
         sizeDTO.setAvailableQuantity(dto.getAvailableQuantity());
         return sizeDTO;
     }
+
+   
 }
