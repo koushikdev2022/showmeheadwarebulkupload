@@ -65,4 +65,36 @@ public class CapInventoryDTO {
     
     @JsonProperty("leatherPatch_2500_plus")
     private BigDecimal leatherPatch2500Plus;
+    
+    // Main product images
+    @JsonProperty("image_1")
+    private String image1;
+    
+    @JsonProperty("image_2")
+    private String image2;
+    
+    @JsonProperty("image_3")
+    private String image3;
+    
+    @JsonProperty("image_4")
+    private String image4;
+    
+    @JsonProperty("image_5")
+    private String image5;
+    
+    // Sub/variant images
+    @JsonProperty("sub_image_1")
+    private String subImage1;
+    
+    @JsonProperty("sub_image_2")
+    private String subImage2;
+    
+    @JsonProperty("sub_image_3")
+    private String subImage3;
+    
+    @JsonProperty("sub_image_4")
+    private String subImage4;
+    
+    @JsonProperty("sub_image_5")
+    private String subImage5;
 }

@@ -10,18 +10,22 @@ import alison.customeheadware.dto.CapInventoryResponseDTO;
 import alison.customeheadware.dto.CapSizeDTO;
 import alison.customeheadware.dto.DecorationPriceTierDTO;
 import alison.customeheadware.dto.GroupedCapInventoryDTO;
+import alison.customeheadware.dto.ImageDTO;
 import alison.customeheadware.entity.Hat;
 import alison.customeheadware.entity.HatColor;
+import alison.customeheadware.entity.HatImage;
 import alison.customeheadware.entity.HatSizeVariant;
 import alison.customeheadware.entity.InventoryItem;
 import alison.customeheadware.entity.StyleDecorationPriceTier;
 import alison.customeheadware.enums.InventorySource;
 import alison.customeheadware.enums.InventoryStatus;
 import alison.customeheadware.repository.HatColorRepository;
+import alison.customeheadware.repository.HatImageRepository;
 import alison.customeheadware.repository.HatRepository;
 import alison.customeheadware.repository.HatSizeVariantRepository;
 import alison.customeheadware.repository.InventoryItemRepository;
 import alison.customeheadware.repository.StyleDecorationPriceTierRepository;
+import jakarta.persistence.Column;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -36,6 +40,8 @@ public class InsertDatabaseBulkService {
     private InventoryItemRepository inventoryItemRepository;
     @Autowired
     private StyleDecorationPriceTierRepository styleDecorationPriceTierRepository;
+    @Autowired
+    private HatImageRepository hatImageRepository;
     @Transactional
     public CapInventoryResponseDTO uploadIntoDatabase(CapInventoryResponseDTO capInventoryResponseDTO) {
         
@@ -50,7 +56,15 @@ public class InsertDatabaseBulkService {
             }
             
             Long hatId = findOrCreateHat(hatData.getHatName(), hatData.getHatDescription());
-            
+            HatImage imHat =  HatImage.builder()
+                                    .imageUrl(hatData.getHatImage())
+                                    .imageType("hat")
+                                    .isActive(1)
+                                    .isPrimary(0)
+                                    .hat(hatId)
+                                    .hatColor(0L)
+                                    .build();
+                                    hatImageRepository.save(imHat);
             // if (hatData.getItems() == null) {
             //     continue;  
             // }
@@ -74,7 +88,18 @@ public class InsertDatabaseBulkService {
                 if (colorItemDTO.getSizes() == null) {
                     continue;  
                 }
-                
+                for(ImageDTO image: colorItemDTO.getImages()){
+                    HatImage im =  HatImage.builder()
+                                    .imageUrl(image.getImage())
+                                    .imageType("color")
+                                    .isActive(1)
+                                    .isPrimary(0)
+                                    .hat(hatId)
+                                    .hatColor(colorId)
+                                    .build();
+                                    hatImageRepository.save(im);
+                        
+                }
                 for (CapSizeDTO capSize : colorItemDTO.getSizes()) {
                     if (capSize == null || capSize.getHatSize() == null) {
                         continue;  

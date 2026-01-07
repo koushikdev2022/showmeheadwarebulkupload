@@ -19,5 +19,8 @@ public class CapColorItemDTO {
     
     @JsonProperty("sizes")
     private List<CapSizeDTO> sizes = new ArrayList<>();
+
+     @JsonProperty("images")  // Color-specific sub images
+    private List<ImageDTO> images = new ArrayList<>();
 }
 

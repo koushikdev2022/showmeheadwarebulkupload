@@ -24,13 +24,13 @@ public class HatImage {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "hat_style_id")
-    private Hat hat;
+    
+    @Column(name = "hat_style_id")
+    private Long hat;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "hat_color_id")
-    private HatColor hatColor;
+    
+    @Column(name = "hat_color_id")
+    private Long hatColor;
 
     @Column(name = "image_url", nullable = false)
     private String imageUrl;

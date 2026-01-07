@@ -19,13 +19,19 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CsvParserService {
     
-    // ALL 17 headers are REQUIRED
+    // Core 17 headers are REQUIRED (image fields are optional)
     private static final Set<String> REQUIRED_HEADERS = Set.of(
         "Hat Name", "Hat Color", "Hat size", "Hat Description", "Available Quantity",
         "Embroidery_24", "Embroidery_48", "Embroidery_96", "Embroidery_144", 
         "Embroidery_576", "Embroidery_2500_plus",
         "LeatherPatch_24", "LeatherPatch_48", "LeatherPatch_96", "LeatherPatch_144", 
         "LeatherPatch_576", "LeatherPatch_2500_plus"
+    );
+    
+    // Optional image headers
+    private static final Set<String> OPTIONAL_HEADERS = Set.of(
+        "image_1", "image_2", "image_3", "image_4", "image_5",
+        "sub_image_1", "sub_image_2", "sub_image_3", "sub_image_4", "sub_image_5"
     );
     
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -152,13 +158,13 @@ public class CsvParserService {
             .filter(h -> !h.isEmpty())
             .collect(Collectors.toSet());
         
-        // Check for missing headers
+        // Check for missing required headers
         Set<String> missingHeaders = new HashSet<>(REQUIRED_HEADERS);
         missingHeaders.removeAll(actualHeaders);
         
         if (!missingHeaders.isEmpty()) {
             throw new CsvValidationException(
-                String.format("Missing required columns: %s. Please ensure CSV has all 17 columns: %s",
+                String.format("Missing required columns: %s. Please ensure CSV has all 17 required columns: %s",
                     missingHeaders, REQUIRED_HEADERS),
                 "MISSING_HEADERS"
             );
@@ -180,6 +186,15 @@ public class CsvParserService {
                 "Duplicate headers found: " + duplicates,
                 "DUPLICATE_HEADERS"
             );
+        }
+        
+        // Log optional headers found
+        Set<String> optionalFound = actualHeaders.stream()
+            .filter(OPTIONAL_HEADERS::contains)
+            .collect(Collectors.toSet());
+        
+        if (!optionalFound.isEmpty()) {
+            log.info("Found {} optional image columns: {}", optionalFound.size(), optionalFound);
         }
         
         log.info("CSV header validation passed. All 17 required columns present.");
@@ -249,6 +264,20 @@ public class CsvParserService {
         dto.setLeatherPatch144(parsePriceValue(row, headerMap.get("LeatherPatch_144")));
         dto.setLeatherPatch576(parsePriceValue(row, headerMap.get("LeatherPatch_576")));
         dto.setLeatherPatch2500Plus(parsePriceValue(row, headerMap.get("LeatherPatch_2500_plus")));
+        
+        // Main product images (optional)
+        dto.setImage1(getValueOrNull(row, headerMap.get("image_1")));
+        dto.setImage2(getValueOrNull(row, headerMap.get("image_2")));
+        dto.setImage3(getValueOrNull(row, headerMap.get("image_3")));
+        dto.setImage4(getValueOrNull(row, headerMap.get("image_4")));
+        dto.setImage5(getValueOrNull(row, headerMap.get("image_5")));
+        
+        // Sub/variant images (optional)
+        dto.setSubImage1(getValueOrNull(row, headerMap.get("sub_image_1")));
+        dto.setSubImage2(getValueOrNull(row, headerMap.get("sub_image_2")));
+        dto.setSubImage3(getValueOrNull(row, headerMap.get("sub_image_3")));
+        dto.setSubImage4(getValueOrNull(row, headerMap.get("sub_image_4")));
+        dto.setSubImage5(getValueOrNull(row, headerMap.get("sub_image_5")));
         
         return dto;
     }

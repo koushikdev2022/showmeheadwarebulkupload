@@ -16,7 +16,10 @@ public class GroupedCapInventoryDTO {
     
     @JsonProperty("hatName")
     private String hatName;
-    
+
+    @JsonProperty("hatImage")
+    private String hatImage;
+
     @JsonProperty("hatDescription")
     private String hatDescription;
 
@@ -25,4 +28,8 @@ public class GroupedCapInventoryDTO {
     
     @JsonProperty("items")
     private List<CapColorItemDTO> items = new ArrayList<>();
+
+   
+    private List<ImageDTO> images = new ArrayList<>();
+ 
 }
