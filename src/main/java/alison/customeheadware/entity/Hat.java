@@ -37,7 +37,7 @@ public class Hat {
     @Column(name = "internal_style_code")
     private String internalStyleCode;
 
-    @Lob
+
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
